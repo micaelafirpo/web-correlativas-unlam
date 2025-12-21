@@ -2,10 +2,14 @@ let materias = []
 let aprobadas = JSON.parse(localStorage.getItem("aprobadas")) || []
 
 /* Layout */
-const ANCHO_ANIO = 260
-const OFFSET_X = 60
+const ANCHO_ANIO = 400        // bloque por año
+const OFFSET_X = 80
 const OFFSET_Y = 80
-const ESPACIADO_Y = 70
+const ESPACIADO_Y = 90
+
+const NODO_ANCHO = 140
+const SUBCOL_GAP = 40        // espacio entre subcolumnas
+
 
 /* Cargar materias */
 fetch("materias.json")
@@ -18,17 +22,30 @@ fetch("materias.json")
 
 /* Posiciones fijas por año */
 function calcularPosiciones() {
-    const contador = {}
+    const porAnio = {}
 
     materias.forEach(m => {
-        if (!contador[m.anio]) contador[m.anio] = 0
+        if (!porAnio[m.anio]) {
+            porAnio[m.anio] = { izq: 0, der: 0 }
+        }
 
-        m.x = OFFSET_X + (m.anio - 1) * ANCHO_ANIO
-        m.y = OFFSET_Y + contador[m.anio] * ESPACIADO_Y
+        // asignación determinística: primero llena izq, luego der
+        const col = porAnio[m.anio].izq <= porAnio[m.anio].der ? "izq" : "der"
 
-        contador[m.anio]++
+        const baseX = OFFSET_X + (m.anio - 1) * ANCHO_ANIO
+
+        const xIzq = baseX
+        const xDer = baseX + NODO_ANCHO + SUBCOL_GAP
+
+        m.x = col === "izq" ? xIzq : xDer
+        m.y = OFFSET_Y + porAnio[m.anio][col] * ESPACIADO_Y
+
+        porAnio[m.anio][col]++
     })
 }
+
+
+
 
 /* Habilitación */
 function estaHabilitada(materia) {
@@ -78,19 +95,20 @@ function renderNodos() {
 function renderFlechas() {
     const svg = document.getElementById("edges")
     const container = document.getElementById("grafo-container")
-
     svg.innerHTML = ""
 
     const contRect = container.getBoundingClientRect()
 
-    // Definición de flecha
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs")
     defs.innerHTML = `
-    <marker id="arrow" markerWidth="10" markerHeight="10"
-      refX="10" refY="3"
+    <marker id="arrow"
+      markerWidth="8"
+      markerHeight="8"
+      refX="8"
+      refY="4"
       orient="auto"
       markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#aaa"/>
+      <path d="M0,0 L0,8 L8,4 z" fill="#999"/>
     </marker>
   `
     svg.appendChild(defs)
@@ -107,32 +125,48 @@ function renderFlechas() {
 
             const r1 = from.getBoundingClientRect()
 
-            // Coordenadas relativas al contenedor
-            const x1 = r1.right - contRect.left
+            const x1 = r1.left + r1.width - contRect.left
             const y1 = r1.top + r1.height / 2 - contRect.top
             const x2 = r2.left - contRect.left
             const y2 = r2.top + r2.height / 2 - contRect.top
 
-            const dx = (x2 - x1) * 0.5
+            const sameYear = from.classList.contains(`a${m.anio}`)
+
+            let d
+
+            if (sameYear) {
+                // curva vertical elegante
+                const midY = (y1 + y2) / 2
+                d = `
+          M ${x1} ${y1}
+          C ${x1 + 40} ${y1},
+            ${x2 - 40} ${midY},
+            ${x2} ${y2}
+        `
+            } else {
+                const dx = (x2 - x1) * 0.6
+                d = `
+          M ${x1} ${y1}
+          C ${x1 + dx} ${y1},
+            ${x2 - dx} ${y2},
+            ${x2} ${y2}
+        `
+            }
 
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
-            path.setAttribute(
-                "d",
-                `M ${x1} ${y1}
-         C ${x1 + dx} ${y1},
-           ${x2 - dx} ${y2},
-           ${x2} ${y2}`
-            )
-
+            path.setAttribute("d", d)
             path.setAttribute("fill", "none")
-            path.setAttribute("stroke", "#aaa")
-            path.setAttribute("stroke-width", "1.5")
+            path.setAttribute("stroke", "#999")
+            path.setAttribute("stroke-width", "1.2")
+            path.setAttribute("stroke-linecap", "round")
             path.setAttribute("marker-end", "url(#arrow)")
+            path.setAttribute("opacity", "0.7")
 
             svg.appendChild(path)
         })
     })
 }
+
 
 
 /* Render general */
