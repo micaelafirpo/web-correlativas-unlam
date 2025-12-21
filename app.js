@@ -77,7 +77,23 @@ function renderNodos() {
 /* Render flechas */
 function renderFlechas() {
     const svg = document.getElementById("edges")
+    const container = document.getElementById("grafo-container")
+
     svg.innerHTML = ""
+
+    const contRect = container.getBoundingClientRect()
+
+    // Definición de flecha
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs")
+    defs.innerHTML = `
+    <marker id="arrow" markerWidth="10" markerHeight="10"
+      refX="10" refY="3"
+      orient="auto"
+      markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#aaa"/>
+    </marker>
+  `
+    svg.appendChild(defs)
 
     materias.forEach(m => {
         const to = document.getElementById(m.id)
@@ -91,18 +107,33 @@ function renderFlechas() {
 
             const r1 = from.getBoundingClientRect()
 
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line")
-            line.setAttribute("x1", r1.right)
-            line.setAttribute("y1", r1.top + r1.height / 2)
-            line.setAttribute("x2", r2.left)
-            line.setAttribute("y2", r2.top + r2.height / 2)
-            line.setAttribute("stroke", "#aaa")
-            line.setAttribute("stroke-width", "1.5")
+            // Coordenadas relativas al contenedor
+            const x1 = r1.right - contRect.left
+            const y1 = r1.top + r1.height / 2 - contRect.top
+            const x2 = r2.left - contRect.left
+            const y2 = r2.top + r2.height / 2 - contRect.top
 
-            svg.appendChild(line)
+            const dx = (x2 - x1) * 0.5
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+            path.setAttribute(
+                "d",
+                `M ${x1} ${y1}
+         C ${x1 + dx} ${y1},
+           ${x2 - dx} ${y2},
+           ${x2} ${y2}`
+            )
+
+            path.setAttribute("fill", "none")
+            path.setAttribute("stroke", "#aaa")
+            path.setAttribute("stroke-width", "1.5")
+            path.setAttribute("marker-end", "url(#arrow)")
+
+            svg.appendChild(path)
         })
     })
 }
+
 
 /* Render general */
 function render() {
