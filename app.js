@@ -16,6 +16,7 @@ fetch("materias.json")
         cargarEstado()
         renderColumnas(materias)
         actualizarEstadosVisuales(materias)
+        actualizarProgreso(materias)
     })
 
 // ============================
@@ -101,6 +102,7 @@ function toggleAprobada(id, materias) {
 
     guardarEstado()
     actualizarEstadosVisuales(materias)
+    actualizarProgreso(materias)
 }
 
 function estaHabilitada(materia) {
@@ -173,5 +175,21 @@ document.getElementById("reset-btn").addEventListener("click", () => {
         .then(res => res.json())
         .then(materias => {
             actualizarEstadosVisuales(materias)
+            actualizarProgreso(materias)
         })
 })
+
+// ============================
+// PROGRESO
+// ============================
+
+function actualizarProgreso(materias) {
+    const total = materias.length
+    const aprobadas = estado.aprobadas.length
+    const porcentaje = total === 0 ? 0 : Math.round((aprobadas / total) * 100)
+
+    document.getElementById("progreso-texto").textContent =
+        `Progreso: ${porcentaje}% — ${aprobadas} / ${total} materias aprobadas`
+
+    document.getElementById("progreso-barra").style.width = `${porcentaje}%`
+}
