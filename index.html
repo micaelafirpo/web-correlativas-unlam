@@ -3,29 +3,20 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Mapa de correlativas</title>
+  <title>Mapa de Correlativas</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
 
-  <h1>Plan de correlativas</h1>
-
-  <!-- Leyenda de años -->
-  <div id="leyenda">
-    <span class="anio a1">Primer año</span>
-    <span class="anio a2">Segundo año</span>
-    <span class="anio a3">Tercer año</span>
-    <span class="anio a4">Cuarto año</span>
-    <span class="anio a5">Quinto año</span>
+  <h1 class="titulo">Mapa de correlativas</h1>
+  <div class="acciones">
+    <button id="reset-btn">Resetear progreso</button>
   </div>
 
-  <button id="reset">Resetear progreso</button>
-
-  <!-- Grafo -->
-  <div id="grafo-container">
-    <svg id="edges"></svg>
-    <div id="nodes"></div>
+  <div id="mapa-container">
+    <!-- <svg id="edges"></svg> -->
+    <div id="columnas"></div>
   </div>
 
   <script src="app.js"></script>

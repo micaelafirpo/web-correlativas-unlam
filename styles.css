@@ -1,98 +1,152 @@
-.a1, .a2, .a3, .a4, .a5 {
-  outline: 1px dashed rgba(0,0,0,0.1);
-}
-
-
 body {
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
-  padding: 20px;
+  font-family: system-ui, sans-serif;
+  background: #fafafa;
+  margin: 0;
 }
 
-h1 {
-  margin-bottom: 10px;
+.titulo {
+  text-align: center;
+  margin: 16px 0;
 }
 
-/* Leyenda */
-#leyenda {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-#leyenda .anio {
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-}
-
-/* Contenedor del grafo */
-#grafo-container {
+#mapa-container {
   position: relative;
-  width: 100%;
-  height: 80vh;
-  background: white;
+  padding: 40px;
+  overflow-x: auto;
+}
+
+/* RESET */
+
+.acciones {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+#reset-btn {
+  padding: 8px 16px;
   border-radius: 8px;
-  overflow: auto;
+  border: none;
+  background: #eee;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
-/* SVG de flechas */
-#edges {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
+#reset-btn:hover {
+  background: #ddd;
+}
+
+#reset-btn:active {
+  transform: scale(0.97);
 }
 
 
-/* Contenedor de nodos */
-#nodes {
+/* COLUMNAS */
+
+#columnas {
+  display: flex;
+  gap: 80px;
   position: relative;
   z-index: 2;
 }
 
-/* Nodo */
-.nodo {
-  position: absolute;
-  width: 140px;          /* 🔒 ancho fijo */
-  padding: 8px;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  text-align: center;
-  line-height: 1.2;
-  transition: 0.3s;
-  opacity: 0.35;
+.columna {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  white-space: normal;  /* permite salto de línea */
-  word-wrap: break-word;
+.columna h2 {
+  margin-bottom: 24px;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.anio-wrap {
+  display: flex;
+  gap: 48px;
+}
+
+.subcolumna {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
 
-/* Colores por año (apagados) */
-.a1 { background: #dbe9f6; }
-.a2 { background: #dff2ef; }
-.a3 { background: #eef5d7; }
-.a4 { background: #f3e5d7; }
-.a5 { background: #f3dede; }
+/* NODOS */
 
-/* Estados */
-.nodo.habilitada {
-  opacity: 1;
-}
-
-.nodo.aprobada {
-  background: #4caf50 !important;
-  color: white;
-  opacity: 1;
-}
-
-/* Botón */
-#reset {
+.materia {
+  width: 150px;
+  height: 56px;
+  flex-shrink: 0;
+  background: #eaeaea;
+  border-radius: 10px;
   margin-bottom: 10px;
-  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 13px;
+  padding: 5px;
+  box-sizing: border-box;
+  position: relative;
+  cursor: pointer;
+    transition:
+    background-color 0.25s ease,
+    border 0.25s ease,
+    opacity 0.25s ease,
+    transform 0.15s ease;
+}
+
+/* aprobada */
+.materia.aprobada {
+  background: #c8f7c5 !important;
+  border: 2px solid #4caf50;
+  transform: scale(1.02);
+}
+
+/* habilitada */
+.materia.habilitada {
+  opacity: 1;
   cursor: pointer;
 }
+.materia.habilitada:hover {
+  transform: scale(1.04);
+}
+
+/* bloqueada */
+.materia.bloqueada {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.anio-1 { background: #e0e0e0; }
+.anio-2 { background: #fff3cd; }
+.anio-3 { background: #e7f1ff; }
+.anio-4 { background: #fde2ea; }
+.anio-5 { background: #efe6ff; }
+
+/* SVG */
+
+#edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+path {
+  fill: none;
+  stroke: #9a9a9a;
+  stroke-width: 2;
+  stroke-linecap: round;
+  transition: stroke 0.2s;
+}
+
+.marker {
+  fill: #9a9a9a;
+}
+

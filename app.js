@@ -1,183 +1,177 @@
-let materias = []
-let aprobadas = JSON.parse(localStorage.getItem("aprobadas")) || []
+// ============================
+// CONFIG
+// ============================
 
-/* Layout */
-const ANCHO_ANIO = 400        // bloque por año
-const OFFSET_X = 80
-const OFFSET_Y = 80
-const ESPACIADO_Y = 90
+let estado = {
+    aprobadas: []
+}
 
-const NODO_ANCHO = 140
-const SUBCOL_GAP = 40        // espacio entre subcolumnas
+// ============================
+// INIT
+// ============================
 
-
-/* Cargar materias */
 fetch("materias.json")
     .then(res => res.json())
-    .then(data => {
-        materias = data
-        calcularPosiciones()
-        render()
+    .then(materias => {
+        cargarEstado()
+        renderColumnas(materias)
+        actualizarEstadosVisuales(materias)
     })
 
-/* Posiciones fijas por año */
-function calcularPosiciones() {
-    const porAnio = {}
+// ============================
+// ESTADO (localStorage)
+// ============================
 
-    materias.forEach(m => {
-        if (!porAnio[m.anio]) {
-            porAnio[m.anio] = { izq: 0, der: 0 }
-        }
-
-        // asignación determinística: primero llena izq, luego der
-        const col = porAnio[m.anio].izq <= porAnio[m.anio].der ? "izq" : "der"
-
-        const baseX = OFFSET_X + (m.anio - 1) * ANCHO_ANIO
-
-        const xIzq = baseX
-        const xDer = baseX + NODO_ANCHO + SUBCOL_GAP
-
-        m.x = col === "izq" ? xIzq : xDer
-        m.y = OFFSET_Y + porAnio[m.anio][col] * ESPACIADO_Y
-
-        porAnio[m.anio][col]++
-    })
+function guardarEstado() {
+    localStorage.setItem("estadoMaterias", JSON.stringify(estado))
 }
 
-
-
-
-/* Habilitación */
-function estaHabilitada(materia) {
-    return materia.correlativas.every(c => aprobadas.includes(c))
+function cargarEstado() {
+    const data = localStorage.getItem("estadoMaterias")
+    if (data) estado = JSON.parse(data)
 }
 
-/* Toggle aprobar */
-function toggleMateria(id) {
-    if (aprobadas.includes(id)) {
-        aprobadas = aprobadas.filter(m => m !== id)
+// ============================
+// RENDER COLUMNAS + SUBCOLUMNAS
+// ============================
+
+function renderColumnas(materias) {
+    const contenedor = document.getElementById("columnas")
+    contenedor.innerHTML = ""
+
+    const porAnio = agruparPorAnio(materias)
+
+    Object.keys(porAnio)
+        .sort((a, b) => a - b)
+        .forEach(anio => {
+            const col = document.createElement("div")
+            col.className = "columna"
+
+            const titulo = document.createElement("h2")
+            titulo.textContent = `Año ${anio}`
+            col.appendChild(titulo)
+
+            const wrap = document.createElement("div")
+            wrap.className = "anio-wrap"
+
+            const colA = document.createElement("div")
+            colA.className = "subcolumna"
+
+            const colB = document.createElement("div")
+            colB.className = "subcolumna"
+
+            porAnio[anio]
+                .sort((a, b) => peso(b, materias) - peso(a, materias))
+                .forEach(m => {
+                    const div = document.createElement("div")
+                    div.className = `materia anio-${anio}`
+                    div.id = m.id
+                    div.textContent = m.nombre
+
+                    div.addEventListener("click", () => {
+                        if (estaHabilitada(m)) {
+                            toggleAprobada(m.id, materias)
+                        }
+                    })
+
+                    subcolumna(m, materias) === "B"
+                        ? colB.appendChild(div)
+                        : colA.appendChild(div)
+                })
+
+            wrap.appendChild(colA)
+            wrap.appendChild(colB)
+            col.appendChild(wrap)
+            contenedor.appendChild(col)
+        })
+}
+
+// ============================
+// LÓGICA DE ESTADO
+// ============================
+
+function toggleAprobada(id, materias) {
+    const idx = estado.aprobadas.indexOf(id)
+
+    if (idx === -1) {
+        estado.aprobadas.push(id)
     } else {
-        aprobadas.push(id)
+        estado.aprobadas.splice(idx, 1)
     }
 
-    localStorage.setItem("aprobadas", JSON.stringify(aprobadas))
-    render()
+    guardarEstado()
+    actualizarEstadosVisuales(materias)
 }
 
-/* Render nodos */
-function renderNodos() {
-    const cont = document.getElementById("nodes")
-    cont.innerHTML = ""
+function estaHabilitada(materia) {
+    return materia.correlativas.every(id =>
+        estado.aprobadas.includes(id)
+    )
+}
 
+function actualizarEstadosVisuales(materias) {
     materias.forEach(m => {
-        const div = document.createElement("div")
-        div.className = `nodo a${m.anio}`
-        div.id = m.id
-        div.textContent = m.nombre
+        const el = document.getElementById(m.id)
+        if (!el) return
 
-        div.style.left = `${m.x}px`
-        div.style.top = `${m.y}px`
+        el.classList.remove("aprobada", "habilitada", "bloqueada")
 
-        if (estaHabilitada(m)) div.classList.add("habilitada")
-        if (aprobadas.includes(m.id)) div.classList.add("aprobada")
-
-        div.onclick = () => {
-            if (estaHabilitada(m) || aprobadas.includes(m.id)) {
-                toggleMateria(m.id)
-            }
+        if (estado.aprobadas.includes(m.id)) {
+            el.classList.add("aprobada")
+        } else if (estaHabilitada(m)) {
+            el.classList.add("habilitada")
+        } else {
+            el.classList.add("bloqueada")
         }
-
-        cont.appendChild(div)
     })
 }
 
-/* Render flechas */
-function renderFlechas() {
-    const svg = document.getElementById("edges")
-    const container = document.getElementById("grafo-container")
-    svg.innerHTML = ""
+// ============================
+// SUBCOLUMNAS (CORRELATIVAS INTERNAS)
+// ============================
 
-    const contRect = container.getBoundingClientRect()
+function tieneCorrelativasInternas(materia, materias) {
+    return materia.correlativas.some(id => {
+        const dep = materias.find(m => m.id === id)
+        return dep && dep.anio === materia.anio
+    })
+}
 
-    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs")
-    defs.innerHTML = `
-    <marker id="arrow"
-      markerWidth="8"
-      markerHeight="8"
-      refX="8"
-      refY="4"
-      orient="auto"
-      markerUnits="strokeWidth">
-      <path d="M0,0 L0,8 L8,4 z" fill="#999"/>
-    </marker>
-  `
-    svg.appendChild(defs)
+function subcolumna(materia, materias) {
+    return tieneCorrelativasInternas(materia, materias) ? "B" : "A"
+}
 
-    materias.forEach(m => {
-        const to = document.getElementById(m.id)
-        if (!to) return
+// ============================
+// HELPERS
+// ============================
 
-        const r2 = to.getBoundingClientRect()
+function agruparPorAnio(materias) {
+    return materias.reduce((acc, m) => {
+        if (!acc[m.anio]) acc[m.anio] = []
+        acc[m.anio].push(m)
+        return acc
+    }, {})
+}
 
-        m.correlativas.forEach(c => {
-            const from = document.getElementById(c)
-            if (!from) return
+function peso(materia, materias) {
+    return materias.filter(m =>
+        m.correlativas.includes(materia.id)
+    ).length
+}
 
-            const r1 = from.getBoundingClientRect()
+// ============================
+// RESET
+// ============================
 
-            const x1 = r1.left + r1.width - contRect.left
-            const y1 = r1.top + r1.height / 2 - contRect.top
-            const x2 = r2.left - contRect.left
-            const y2 = r2.top + r2.height / 2 - contRect.top
+document.getElementById("reset-btn").addEventListener("click", () => {
+    if (!confirm("¿Seguro que querés resetear todo el progreso?")) return
 
-            const sameYear = from.classList.contains(`a${m.anio}`)
+    estado.aprobadas = []
+    guardarEstado()
 
-            let d
-
-            if (sameYear) {
-                // curva vertical elegante
-                const midY = (y1 + y2) / 2
-                d = `
-          M ${x1} ${y1}
-          C ${x1 + 40} ${y1},
-            ${x2 - 40} ${midY},
-            ${x2} ${y2}
-        `
-            } else {
-                const dx = (x2 - x1) * 0.6
-                d = `
-          M ${x1} ${y1}
-          C ${x1 + dx} ${y1},
-            ${x2 - dx} ${y2},
-            ${x2} ${y2}
-        `
-            }
-
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
-            path.setAttribute("d", d)
-            path.setAttribute("fill", "none")
-            path.setAttribute("stroke", "#999")
-            path.setAttribute("stroke-width", "1.2")
-            path.setAttribute("stroke-linecap", "round")
-            path.setAttribute("marker-end", "url(#arrow)")
-            path.setAttribute("opacity", "0.7")
-
-            svg.appendChild(path)
+    fetch("materias.json")
+        .then(res => res.json())
+        .then(materias => {
+            actualizarEstadosVisuales(materias)
         })
-    })
-}
-
-
-
-/* Render general */
-function render() {
-    renderNodos()
-    renderFlechas()
-}
-
-/* Reset */
-document.getElementById("reset").onclick = () => {
-    aprobadas = []
-    localStorage.removeItem("aprobadas")
-    render()
-}
+})
