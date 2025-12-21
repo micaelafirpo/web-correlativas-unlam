@@ -1,6 +1,6 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f4f4f4;
+  background: #f5f5f5;
   padding: 20px;
 }
 
@@ -8,89 +8,76 @@ h1 {
   margin-bottom: 10px;
 }
 
-#reset {
-  margin-bottom: 15px;
-  padding: 6px 12px;
-  cursor: pointer;
-}
-
-#contenedor {
-  position: relative;
-}
-
-#mapa {
+/* Leyenda */
+#leyenda {
   display: flex;
-  gap: 20px;
-  position: relative;
-  z-index: 2;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
-#lineas {
+#leyenda .anio {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+/* Contenedor del grafo */
+#grafo-container {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  background: white;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+/* SVG de flechas */
+#edges {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
 }
 
-.columna {
-  background: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  min-width: 230px;
-}
-
-.columna h2 {
-  text-align: center;
-  font-size: 15px;
-}
-
-/* colores por año (apagados) */
-.anio-1 { background: #e0e0e0; }
-.anio-2 { background: #f5f0c8; }
-.anio-3 { background: #dbe6f5; }
-.anio-4 { background: #f3dbe6; }
-.anio-5 { background: #e6dbf5; }
-
-.materia {
-  padding: 8px;
-  margin: 6px 0;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  opacity: 0.35;
+/* Contenedor de nodos */
+#nodes {
   position: relative;
+  z-index: 2;
 }
 
-.materia.habilitada {
+/* Nodo */
+.nodo {
+  position: absolute;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.3s;
+  opacity: 0.35;
+}
+
+/* Colores por año (apagados) */
+.a1 { background: #dbe9f6; }
+.a2 { background: #dff2ef; }
+.a3 { background: #eef5d7; }
+.a4 { background: #f3e5d7; }
+.a5 { background: #f3dede; }
+
+/* Estados */
+.nodo.habilitada {
   opacity: 1;
 }
 
-.materia.aprobada {
+.nodo.aprobada {
   background: #4caf50 !important;
   color: white;
   opacity: 1;
 }
 
-.materia:hover::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: 105%;
-  top: 0;
-  background: #333;
-  color: #fff;
-  padding: 6px;
-  font-size: 12px;
-  white-space: pre;
-  border-radius: 4px;
-  z-index: 5;
-}
-
-.materia.animar {
-  animation: glow 0.6s ease;
-}
-
-@keyframes glow {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.06); }
-  100% { transform: scale(1); }
+/* Botón */
+#reset {
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
 }

@@ -1,116 +1,118 @@
 let materias = []
 let aprobadas = JSON.parse(localStorage.getItem("aprobadas")) || []
 
+/* Layout */
+const ANCHO_ANIO = 260
+const OFFSET_X = 60
+const OFFSET_Y = 80
+const ESPACIADO_Y = 70
+
+/* Cargar materias */
 fetch("materias.json")
     .then(res => res.json())
     .then(data => {
         materias = data
+        calcularPosiciones()
         render()
     })
-    .catch(err => {
-        console.error("Error cargando materias.json", err)
+
+/* Posiciones fijas por año */
+function calcularPosiciones() {
+    const contador = {}
+
+    materias.forEach(m => {
+        if (!contador[m.anio]) contador[m.anio] = 0
+
+        m.x = OFFSET_X + (m.anio - 1) * ANCHO_ANIO
+        m.y = OFFSET_Y + contador[m.anio] * ESPACIADO_Y
+
+        contador[m.anio]++
     })
-
-
-const mapa = document.getElementById("mapa")
-const svg = document.getElementById("lineas")
-
-function estaHabilitada(m) {
-    return m.correlativas.every(c => aprobadas.includes(c))
 }
 
+/* Habilitación */
+function estaHabilitada(materia) {
+    return materia.correlativas.every(c => aprobadas.includes(c))
+}
+
+/* Toggle aprobar */
 function toggleMateria(id) {
     if (aprobadas.includes(id)) {
         aprobadas = aprobadas.filter(m => m !== id)
     } else {
         aprobadas.push(id)
     }
+
     localStorage.setItem("aprobadas", JSON.stringify(aprobadas))
     render()
 }
 
-function render() {
-    mapa.innerHTML = ""
-    svg.innerHTML = ""
+/* Render nodos */
+function renderNodos() {
+    const cont = document.getElementById("nodes")
+    cont.innerHTML = ""
 
-    const porAnio = {}
     materias.forEach(m => {
-        if (!porAnio[m.anio]) porAnio[m.anio] = []
-        porAnio[m.anio].push(m)
-    })
+        const div = document.createElement("div")
+        div.className = `nodo a${m.anio}`
+        div.id = m.id
+        div.textContent = m.nombre
 
-    Object.keys(porAnio).forEach(anio => {
-        const col = document.createElement("div")
-        col.className = `columna anio-${anio}`
-        col.innerHTML = `<h2>Año ${anio}</h2>`
+        div.style.left = `${m.x}px`
+        div.style.top = `${m.y}px`
 
-        porAnio[anio].forEach(m => {
-            const div = document.createElement("div")
-            div.className = "materia"
-            div.id = m.id
-            div.textContent = m.nombre
+        if (estaHabilitada(m)) div.classList.add("habilitada")
+        if (aprobadas.includes(m.id)) div.classList.add("aprobada")
 
-            if (estaHabilitada(m)) div.classList.add("habilitada")
-            if (aprobadas.includes(m.id)) div.classList.add("aprobada")
-
-            div.dataset.tooltip =
-                m.correlativas.length
-                    ? "Correlativas:\n- " + m.correlativas.join("\n- ")
-                    : "Sin correlativas"
-
-            div.onclick = () => {
-                if (estaHabilitada(m) || aprobadas.includes(m.id)) {
-                    toggleMateria(m.id)
-                    div.classList.add("animar")
-                }
+        div.onclick = () => {
+            if (estaHabilitada(m) || aprobadas.includes(m.id)) {
+                toggleMateria(m.id)
             }
+        }
 
-            col.appendChild(div)
-        })
-
-        mapa.appendChild(col)
+        cont.appendChild(div)
     })
-
-    dibujarLineas()
 }
 
-function dibujarLineas() {
-    const rectSvg = svg.getBoundingClientRect()
+/* Render flechas */
+function renderFlechas() {
+    const svg = document.getElementById("edges")
+    svg.innerHTML = ""
 
     materias.forEach(m => {
-        const destino = document.getElementById(m.id)
-        if (!destino) return
+        const to = document.getElementById(m.id)
+        if (!to) return
 
-        const r2 = destino.getBoundingClientRect()
+        const r2 = to.getBoundingClientRect()
 
         m.correlativas.forEach(c => {
-            const origen = document.getElementById(c)
-            if (!origen) return
+            const from = document.getElementById(c)
+            if (!from) return
 
-            const r1 = origen.getBoundingClientRect()
-
-            const x1 = r1.right - rectSvg.left
-            const y1 = r1.top + r1.height / 2 - rectSvg.top
-            const x2 = r2.left - rectSvg.left
-            const y2 = r2.top + r2.height / 2 - rectSvg.top
+            const r1 = from.getBoundingClientRect()
 
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line")
-            line.setAttribute("x1", x1)
-            line.setAttribute("y1", y1)
-            line.setAttribute("x2", x2)
-            line.setAttribute("y2", y2)
-            line.setAttribute("stroke", "#999")
-            line.setAttribute("stroke-width", "2")
+            line.setAttribute("x1", r1.right)
+            line.setAttribute("y1", r1.top + r1.height / 2)
+            line.setAttribute("x2", r2.left)
+            line.setAttribute("y2", r2.top + r2.height / 2)
+            line.setAttribute("stroke", "#aaa")
+            line.setAttribute("stroke-width", "1.5")
 
             svg.appendChild(line)
         })
     })
 }
 
+/* Render general */
+function render() {
+    renderNodos()
+    renderFlechas()
+}
+
+/* Reset */
 document.getElementById("reset").onclick = () => {
     aprobadas = []
     localStorage.removeItem("aprobadas")
     render()
 }
-
-render()
