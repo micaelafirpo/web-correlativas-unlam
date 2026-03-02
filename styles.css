@@ -13,7 +13,7 @@
 
 
 body {
-  margin: 0;
+  margin: 0 auto;
   padding: 20px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: #f6f7f9;
@@ -123,9 +123,12 @@ button:hover {
 /* ===== NODO MATERIA ===== */
 
 .materia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 120px;
   min-height: 46px;
-  padding: 6px 8px;
+  padding: 6px;
   border-radius: 8px;
   font-size: 12px;
   text-align: center;
