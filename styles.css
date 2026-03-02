@@ -1,62 +1,72 @@
-body {
-  font-family: system-ui, sans-serif;
-  background: #fafafa;
-  margin: 0;
+/* ===== RESET BÁSICO ===== */
+* {
+  box-sizing: border-box;
 }
+
+:root {
+  --anio-1: #d6d6d6;   /* gris */
+  --anio-2: #f3e6a0;   /* amarillo */
+  --anio-3: #c7d9f1;   /* azul */
+  --anio-4: #f1c6d3;   /* rosa */
+  --anio-5: #d9c9f1;   /* violeta */
+}
+
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f6f7f9;
+  color: #222;
+}
+
+/* ===== TÍTULO ===== */
 
 .titulo {
   text-align: center;
-  margin: 16px 0;
+  margin-bottom: 20px;
 }
 
-#mapa-container {
-  position: relative;
-  padding: 40px;
-  overflow-x: auto;
-}
+/* ===== CONTROLES ===== */
 
-/* RESET */
-
+.modo-selector,
 .acciones {
-  text-align: center;
-  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 15px;
 }
 
-#reset-btn {
-  padding: 8px 16px;
-  border-radius: 8px;
+button {
+  padding: 8px 14px;
+  border-radius: 6px;
   border: none;
-  background: #eee;
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s ease, transform 0.1s ease;
+  background: #e0e0e0;
+  transition: background 0.2s ease;
 }
 
-#reset-btn:hover {
-  background: #ddd;
+button:hover {
+  background: #d0d0d0;
 }
 
-#reset-btn:active {
-  transform: scale(0.97);
-}
+/* ===== PROGRESO ===== */
 
-/* PROGRESO */
 .progreso {
-  max-width: 420px;
-  margin: 0 auto 32px auto;
+  max-width: 500px;
+  margin: 0 auto 25px;
   text-align: center;
-  font-size: 14px;
 }
 
 #progreso-texto {
-  margin-bottom: 8px;
-  font-weight: 500;
+  margin-bottom: 6px;
+  font-size: 14px;
 }
 
 .barra {
   width: 100%;
   height: 10px;
-  background: #eee;
+  background: #ddd;
   border-radius: 6px;
   overflow: hidden;
 }
@@ -68,113 +78,128 @@ body {
   transition: width 0.4s ease;
 }
 
+/* ===== MAPA ===== */
 
-/* COLUMNAS */
+#mapa-container {
+  overflow-x: auto;
+  padding-bottom: 20px;
+}
 
 #columnas {
   display: flex;
-  gap: 80px;
-  position: relative;
-  z-index: 2;
+  gap: 40px;
+  align-items: flex-start;
+  min-width: max-content;
 }
+
+/* ===== COLUMNA POR AÑO ===== */
 
 .columna {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 260px;
 }
 
 .columna h2 {
-  margin-bottom: 24px;
-  font-size: 14px;
-  opacity: 0.7;
+  margin-bottom: 15px;
+  font-size: 16px;
+  text-align: center;
 }
 
-.anio-wrap {
+/* ===== SUBCOLUMNAS ===== */
+
+.subcolumnas {
   display: flex;
-  gap: 48px;
+  gap: 20px;
 }
 
-.subcolumna {
+.subcol {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 14px;
 }
 
-
-/* NODOS */
+/* ===== NODO MATERIA ===== */
 
 .materia {
-  width: 150px;
-  height: 56px;
-  flex-shrink: 0;
-  background: #eaeaea;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 120px;
+  min-height: 46px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 12px;
   text-align: center;
-  font-size: 13px;
-  padding: 5px;
-  box-sizing: border-box;
-  position: relative;
   cursor: pointer;
-    transition:
-    background-color 0.25s ease,
-    border 0.25s ease,
-    opacity 0.25s ease,
-    transform 0.15s ease;
+  border: 1px solid rgba(0,0,0,0.25);
+  background: var(--color-anio);
+  transition:
+    background 0.25s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.2s ease;
 }
 
-/* aprobada */
-.materia.aprobada {
-  background: #c8f7c5 !important;
-  border: 2px solid #4caf50;
-  transform: scale(1.02);
+
+.materia:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
 }
 
-/* habilitada */
-.materia.habilitada {
-  opacity: 1;
-  cursor: pointer;
-}
-.materia.habilitada:hover {
-  transform: scale(1.04);
-}
+/* ===== ESTADOS ===== */
 
-/* bloqueada */
 .materia.bloqueada {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
-.anio-1 { background: #e0e0e0; }
-.anio-2 { background: #fff3cd; }
-.anio-3 { background: #e7f1ff; }
-.anio-4 { background: #fde2ea; }
-.anio-5 { background: #efe6ff; }
-
-/* SVG */
-
-#edges {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
+.materia.habilitada {
+  opacity: 1;
 }
 
-path {
-  fill: none;
-  stroke: #9a9a9a;
-  stroke-width: 2;
-  stroke-linecap: round;
-  transition: stroke 0.2s;
+.materia.aprobada {
+  background: #c8e6c9;
+  border-color: #4caf50;
+  font-weight: 600;
 }
 
-.marker {
-  fill: #9a9a9a;
+/* ===== COLORES POR AÑO ===== */
+.anio-1 .materia { --color-anio: var(--anio-1); }
+.anio-2 .materia { --color-anio: var(--anio-2); }
+.anio-3 .materia { --color-anio: var(--anio-3); }
+.anio-4 .materia { --color-anio: var(--anio-4); }
+.anio-5 .materia { --color-anio: var(--anio-5); }
+
+
+/* ===== MODO COMPARACIÓN ===== */
+
+.materia.amigo {
+  background: #e3f2fd;
+  border-color: #64b5f6;
 }
 
+.materia.juntos {
+  background: #fff3cd;
+  border-color: #fbc02d;
+  font-weight: 600;
+}
+
+/* ===== COLORES POR AÑO (SUAVES) ===== */
+
+.anio-1 h2 { color: #777; }        /* gris */
+.anio-2 h2 { color: #b59f3b; }     /* amarillo */
+.anio-3 h2 { color: #4a6fa5; }     /* azul */
+.anio-4 h2 { color: #b56576; }     /* rosa */
+.anio-5 h2 { color: #7b5ea7; }     /* violeta */
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .subcolumnas {
+    gap: 10px;
+  }
+
+  .materia {
+    width: 110px;
+    font-size: 11px;
+  }
+}

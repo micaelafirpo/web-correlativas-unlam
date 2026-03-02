@@ -3,16 +3,23 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Mapa de Correlativas</title>
+  <title>Mapa de correlativas</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
 
   <h1 class="titulo">Mapa de correlativas</h1>
+
+  <div class="modo-selector">
+    <button id="modo-personal">Mi progreso</button>
+    <button id="modo-compartido">Cursar con alguien</button>
+  </div>
+
   <div class="acciones">
     <button id="reset-btn">Resetear progreso</button>
   </div>
+
   <div class="progreso">
     <div id="progreso-texto"></div>
     <div class="barra">
@@ -21,11 +28,15 @@
   </div>
 
   <div id="mapa-container">
-    <!-- <svg id="edges"></svg> -->
     <div id="columnas"></div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- ORDEN IMPORTANTE -->
+  <script src="js/state.js"></script>
+  <script src="js/logic.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/main.js"></script>
+
 </body>
 
 </html>
